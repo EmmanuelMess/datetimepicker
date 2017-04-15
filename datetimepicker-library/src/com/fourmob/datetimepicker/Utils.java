@@ -1,18 +1,18 @@
 package com.fourmob.datetimepicker;
 
+import android.animation.Keyframe;
+import android.animation.ObjectAnimator;
+import android.animation.PropertyValuesHolder;
 import android.annotation.SuppressLint;
 import android.content.Context;
 import android.content.res.ColorStateList;
 import android.content.res.TypedArray;
 import android.graphics.Color;
 import android.os.Build;
+import android.support.annotation.RequiresApi;
 import android.util.TypedValue;
 import android.view.View;
 import android.view.accessibility.AccessibilityManager;
-
-import com.nineoldandroids.animation.Keyframe;
-import com.nineoldandroids.animation.ObjectAnimator;
-import com.nineoldandroids.animation.PropertyValuesHolder;
 
 import java.util.Calendar;
 
@@ -48,7 +48,8 @@ public class Utils {
         return (endYear - startYear) * MONTHS_IN_YEAR + endMonth - startMonth + 1;
     }
 
-	public static ObjectAnimator getPulseAnimator(View labelToAnimate, float decreaseRatio, float increaseRatio) {
+	@RequiresApi(api = Build.VERSION_CODES.HONEYCOMB)
+    public static ObjectAnimator getPulseAnimator(View labelToAnimate, float decreaseRatio, float increaseRatio) {
         Keyframe k0 = Keyframe.ofFloat(0f, 1f);
         Keyframe k1 = Keyframe.ofFloat(0.275f, decreaseRatio);
         Keyframe k2 = Keyframe.ofFloat(0.69f, increaseRatio);

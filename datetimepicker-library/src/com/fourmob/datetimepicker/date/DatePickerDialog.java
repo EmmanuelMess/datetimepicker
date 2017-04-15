@@ -1,9 +1,11 @@
 package com.fourmob.datetimepicker.date;
 
+import android.animation.ObjectAnimator;
 import android.app.Activity;
 import android.content.Context;
 import android.content.res.ColorStateList;
 import android.content.res.Resources;
+import android.os.Build;
 import android.os.Bundle;
 import android.os.SystemClock;
 import android.os.Vibrator;
@@ -21,7 +23,6 @@ import android.widget.TextView;
 
 import com.fourmob.datetimepicker.R;
 import com.fourmob.datetimepicker.Utils;
-import com.nineoldandroids.animation.ObjectAnimator;
 
 import java.text.SimpleDateFormat;
 import java.util.Calendar;
@@ -439,7 +440,7 @@ public class DatePickerDialog extends DialogFragment implements View.OnClickList
         }
 
         // Shows a pulse animation when the view is clicked, or the dialog opens.
-        if (mUsePulseAnimations) {
+        if (mUsePulseAnimations && Build.VERSION.SDK_INT >= Build.VERSION_CODES.HONEYCOMB) {
             ObjectAnimator pulseAnimator = Utils.getPulseAnimator(selectedLabel, 0.9F, 1.05F);
             if (mDelayAnimation) {
                 pulseAnimator.setStartDelay(ANIMATION_DELAY);

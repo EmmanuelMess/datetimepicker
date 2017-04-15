@@ -16,6 +16,8 @@ package com.sleepbot.datetimepicker.time;
  * limitations under the License.
  */
 
+import android.animation.AnimatorSet;
+import android.animation.ObjectAnimator;
 import android.annotation.SuppressLint;
 import android.app.Service;
 import android.content.Context;
@@ -41,8 +43,6 @@ import android.widget.FrameLayout;
 
 import com.fourmob.datetimepicker.R;
 import com.fourmob.datetimepicker.Utils;
-import com.nineoldandroids.animation.AnimatorSet;
-import com.nineoldandroids.animation.ObjectAnimator;
 
 public class RadialPickerLayout extends FrameLayout implements OnTouchListener {
     private static final String TAG = "RadialPickerLayout";
@@ -543,15 +543,11 @@ public class RadialPickerLayout extends FrameLayout implements OnTouchListener {
             Log.e(TAG, "TimePicker does not support view at index " + index);
             return;
         }
-        
-        //NineOldDroids does not work in this case due to dependency recursion.
-        //Don't animate on API 14
-        animate = animate && Build.VERSION.SDK_INT > 14;
 
         int lastIndex = getCurrentItemShowing();
         mCurrentItemShowing = index;
 
-        if (animate && (index != lastIndex)) {
+        if (animate && (index != lastIndex) && Build.VERSION.SDK_INT >= Build.VERSION_CODES.HONEYCOMB) {
             ObjectAnimator[] anims = new ObjectAnimator[4];
             if (index == MINUTE_INDEX) {
                 anims[0] = mHourRadialTextsView.getDisappearAnimator();
@@ -572,9 +568,9 @@ public class RadialPickerLayout extends FrameLayout implements OnTouchListener {
             mTransition.playTogether(anims);
             mTransition.start();
         } else {
-            if (Build.VERSION.SDK_INT >= 11) {
-                int hourAlpha = (index == HOUR_INDEX) ? 255 : 0;
-                int minuteAlpha = (index == MINUTE_INDEX) ? 255 : 0;
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.HONEYCOMB) {
+                int hourAlpha = (index == HOUR_INDEX) ? 1 : 0;
+                int minuteAlpha = (index == MINUTE_INDEX) ? 1 : 0;
                 mHourRadialTextsView.setAlpha(hourAlpha);
                 mHourRadialSelectorView.setAlpha(hourAlpha);
                 mMinuteRadialTextsView.setAlpha(minuteAlpha);
@@ -789,8 +785,12 @@ public class RadialPickerLayout extends FrameLayout implements OnTouchListener {
      * in the circle.
      */
     public void onInitializeAccessibilityNodeInfo(AccessibilityNodeInfo info) {
-        if (Build.VERSION.SDK_INT >= 14) {
-            super.onInitializeAccessibilityNodeInfo(info);
+        super.onInitializeAccessibilityNodeInfo(info);
+
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
+            info.addAction(AccessibilityNodeInfo.AccessibilityAction.ACTION_SCROLL_FORWARD);
+            info.addAction(AccessibilityNodeInfo.AccessibilityAction.ACTION_SCROLL_BACKWARD);
+        } else if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.JELLY_BEAN) {
             info.addAction(AccessibilityNodeInfo.ACTION_SCROLL_FORWARD);
             info.addAction(AccessibilityNodeInfo.ACTION_SCROLL_BACKWARD);
         }
