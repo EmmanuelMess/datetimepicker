@@ -15,23 +15,25 @@ package com.sleepbot.datetimepicker.time;
  * limitations under the License.
  */
 
+import android.animation.Keyframe;
+import android.animation.ObjectAnimator;
+import android.animation.PropertyValuesHolder;
+import android.animation.ValueAnimator;
 import android.content.Context;
 import android.content.res.Resources;
 import android.graphics.Canvas;
 import android.graphics.Color;
 import android.graphics.Paint;
+import android.graphics.Paint.Align;
 import android.graphics.Path;
 import android.graphics.Region;
 import android.graphics.Typeface;
-import android.graphics.Paint.Align;
+import android.os.Build;
+import android.support.annotation.RequiresApi;
 import android.util.Log;
 import android.view.View;
 
 import com.fourmob.datetimepicker.R;
-import com.nineoldandroids.animation.Keyframe;
-import com.nineoldandroids.animation.ObjectAnimator;
-import com.nineoldandroids.animation.PropertyValuesHolder;
-import com.nineoldandroids.animation.ValueAnimator;
 
 /**
  * A view to show a series of numbers in a circular pattern.
@@ -120,41 +122,33 @@ public class RadialTextsView extends View {
 
         // Calculate the radius for the main circle.
         if (is24HourMode) {
-            mCircleRadiusMultiplier = Float.parseFloat(
-                    res.getString(R.string.circle_radius_multiplier_24HourMode));
+            mCircleRadiusMultiplier = Float.parseFloat(res.getString(R.string.circle_radius_multiplier_24HourMode));
         } else {
-            mCircleRadiusMultiplier = Float.parseFloat(
-                    res.getString(R.string.circle_radius_multiplier));
-            mAmPmCircleRadiusMultiplier =
-                    Float.parseFloat(res.getString(R.string.ampm_circle_radius_multiplier));
+            mCircleRadiusMultiplier = Float.parseFloat(res.getString(R.string.circle_radius_multiplier));
+            mAmPmCircleRadiusMultiplier = Float.parseFloat(res.getString(R.string.ampm_circle_radius_multiplier));
         }
 
         // Initialize the widths and heights of the grid, and calculate the values for the numbers.
         mTextGridHeights = new float[7];
         mTextGridWidths = new float[7];
         if (mHasInnerCircle) {
-            mNumbersRadiusMultiplier = Float.parseFloat(
-                    res.getString(R.string.numbers_radius_multiplier_outer));
-            mTextSizeMultiplier = Float.parseFloat(
-                    res.getString(R.string.text_size_multiplier_outer));
-            mInnerNumbersRadiusMultiplier = Float.parseFloat(
-                    res.getString(R.string.numbers_radius_multiplier_inner));
-            mInnerTextSizeMultiplier = Float.parseFloat(
-                    res.getString(R.string.text_size_multiplier_inner));
+            mNumbersRadiusMultiplier = Float.parseFloat(res.getString(R.string.numbers_radius_multiplier_outer));
+            mTextSizeMultiplier = Float.parseFloat(res.getString(R.string.text_size_multiplier_outer));
+            mInnerNumbersRadiusMultiplier = Float.parseFloat(res.getString(R.string.numbers_radius_multiplier_inner));
+            mInnerTextSizeMultiplier = Float.parseFloat(res.getString(R.string.text_size_multiplier_inner));
 
             mInnerTextGridHeights = new float[7];
             mInnerTextGridWidths = new float[7];
         } else {
-            mNumbersRadiusMultiplier = Float.parseFloat(
-                    res.getString(R.string.numbers_radius_multiplier_normal));
-            mTextSizeMultiplier = Float.parseFloat(
-                    res.getString(R.string.text_size_multiplier_normal));
+            mNumbersRadiusMultiplier = Float.parseFloat(res.getString(R.string.numbers_radius_multiplier_normal));
+            mTextSizeMultiplier = Float.parseFloat(res.getString(R.string.text_size_multiplier_normal));
         }
 
         mAnimationRadiusMultiplier = 1;
         mTransitionMidRadiusMultiplier = 1f + (0.05f * (disappearsOut ? -1 : 1));
         mTransitionEndRadiusMultiplier = 1f + (0.3f * (disappearsOut ? 1 : -1));
-        mInvalidateUpdateListener = new InvalidateUpdateListener();
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.HONEYCOMB)
+            mInvalidateUpdateListener = new InvalidateUpdateListener();
 
         mTextGridValuesDirty = true;
         mIsInitialized = true;
@@ -201,7 +195,8 @@ public class RadialTextsView extends View {
             }
 
             // Because the text positions will be static, pre-render the animations.
-            renderAnimations();
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.HONEYCOMB)
+                renderAnimations();
 
             mTextGridValuesDirty = true;
             mDrawValuesReady = true;
@@ -308,7 +303,8 @@ public class RadialTextsView extends View {
      * This implementation should be changed in future, RadialTextsView and RadialSelectorView should
      * be merged at some point since there is now a dependency on the selector position and size.
      */
-    private void drawText(Canvas canvas, String[] texts, int position, float x, float y, boolean useSelectionTextEffect) {
+    private void drawText(Canvas canvas, String[] texts, int position, float x, float y,
+                          boolean useSelectionTextEffect) {
         boolean useSelectionTextColor = false;
 
         // If we know the text being drawn may be affected, calculate whether it actually is.
@@ -317,7 +313,6 @@ public class RadialTextsView extends View {
 
             // Is the selector between this text and the next text.
             if (positionDegrees < mSelectionHourDegrees + DEGREE_POSITION_TICK) {
-
                 // Is the selector between this text and the previous text.
                 if (positionDegrees > mSelectionHourDegrees - DEGREE_POSITION_TICK) {
                     useSelectionTextColor = true;
@@ -355,6 +350,7 @@ public class RadialTextsView extends View {
     /**
      * Render the animations for appearing and disappearing.
      */
+    @RequiresApi(api = Build.VERSION_CODES.HONEYCOMB)
     private void renderAnimations() {
         Keyframe kf0, kf1, kf2, kf3;
         float midwayPoint = 0.2f;
@@ -396,8 +392,8 @@ public class RadialTextsView extends View {
         kf2 = Keyframe.ofFloat(1f, 1f);
         PropertyValuesHolder fadeIn = PropertyValuesHolder.ofKeyframe("alpha", kf0, kf1, kf2);
 
-        mReappearAnimator = ObjectAnimator.ofPropertyValuesHolder(
-                this, radiusReappear, fadeIn).setDuration(totalDuration);
+        mReappearAnimator = ObjectAnimator.ofPropertyValuesHolder(this, radiusReappear, fadeIn)
+                .setDuration(totalDuration);
         mReappearAnimator.addUpdateListener(mInvalidateUpdateListener);
     }
 
@@ -424,6 +420,7 @@ public class RadialTextsView extends View {
         mSelectionInnerCircle = hourInnerCircle;
     }
 
+    @RequiresApi(api = Build.VERSION_CODES.HONEYCOMB)
     private class InvalidateUpdateListener implements ValueAnimator.AnimatorUpdateListener {
         @Override
         public void onAnimationUpdate(ValueAnimator animation) {

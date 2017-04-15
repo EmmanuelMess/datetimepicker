@@ -15,13 +15,14 @@ package com.sleepbot.datetimepicker.time;
  * limitations under the License
  */
 
+import android.animation.ObjectAnimator;
 import android.app.ActionBar.LayoutParams;
 import android.content.res.ColorStateList;
+import android.content.res.Resources;
 import android.graphics.Rect;
 import android.os.Build;
-import android.support.v4.app.DialogFragment;
-import android.content.res.Resources;
 import android.os.Bundle;
+import android.support.v4.app.DialogFragment;
 import android.text.method.TransformationMethod;
 import android.util.Log;
 import android.view.KeyCharacterMap;
@@ -189,8 +190,7 @@ public class TimePickerDialog extends DialogFragment implements RadialPickerLayo
     }
 
     @Override
-    public View onCreateView(LayoutInflater inflater, ViewGroup container,
-                             Bundle savedInstanceState) {
+    public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
         getDialog().getWindow().requestFeature(Window.FEATURE_NO_TITLE);
 
         View view = inflater.inflate(R.layout.time_picker_dialog, null);
@@ -213,8 +213,7 @@ public class TimePickerDialog extends DialogFragment implements RadialPickerLayo
         mMinuteView.setOnKeyListener(keyboardListener);
         mAmPmTextView = (TextView) view.findViewById(R.id.ampm_label);
         mAmPmTextView.setOnKeyListener(keyboardListener);
-        if (Build.VERSION.SDK_INT <= 14) {
-
+        if (Build.VERSION.SDK_INT <= Build.VERSION_CODES.ICE_CREAM_SANDWICH) {
             mAmPmTextView.setTransformationMethod(new TransformationMethod() {
 
                 private final Locale locale = getResources().getConfiguration().locale;
@@ -225,7 +224,8 @@ public class TimePickerDialog extends DialogFragment implements RadialPickerLayo
                 }
 
                 @Override
-                public void onFocusChanged(View view, CharSequence sourceText, boolean focused, int direction, Rect previouslyFocusedRect) {
+                public void onFocusChanged(View view, CharSequence sourceText, boolean focused,
+                                           int direction, Rect previouslyFocusedRect) {
 
                 }
             });
@@ -467,8 +467,8 @@ public class TimePickerDialog extends DialogFragment implements RadialPickerLayo
         mHourView.setTextColor(hourColor);
         mMinuteView.setTextColor(minuteColor);
 
-        if (mUsePulseAnimations) {
-            com.nineoldandroids.animation.ObjectAnimator pulseAnimator = Utils.getPulseAnimator(labelToAnimate, 0.85f, 1.1f);
+        if (mUsePulseAnimations && Build.VERSION.SDK_INT >= Build.VERSION_CODES.HONEYCOMB) {
+            ObjectAnimator pulseAnimator = Utils.getPulseAnimator(labelToAnimate, 0.85f, 1.1f);
             if (delayLabelAnimate) {
                 pulseAnimator.setStartDelay(PULSE_ANIMATOR_DELAY);
             }

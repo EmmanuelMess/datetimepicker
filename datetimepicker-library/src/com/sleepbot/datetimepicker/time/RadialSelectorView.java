@@ -15,20 +15,22 @@ package com.sleepbot.datetimepicker.time;
  * limitations under the License.
  */
 
+import android.animation.Keyframe;
+import android.animation.ObjectAnimator;
+import android.animation.PropertyValuesHolder;
+import android.animation.ValueAnimator;
 import android.content.Context;
 import android.content.res.Resources;
 import android.graphics.Canvas;
 import android.graphics.Color;
 import android.graphics.Paint;
+import android.os.Build;
+import android.support.annotation.RequiresApi;
 import android.util.Log;
 import android.view.View;
 
 import com.fourmob.datetimepicker.R;
 import com.fourmob.datetimepicker.Utils;
-import com.nineoldandroids.animation.Keyframe;
-import com.nineoldandroids.animation.ObjectAnimator;
-import com.nineoldandroids.animation.PropertyValuesHolder;
-import com.nineoldandroids.animation.ValueAnimator;
 
 /**
  * View to show what number is selected. This will draw a blue circle over the number, with a blue
@@ -131,7 +133,8 @@ public class RadialSelectorView extends View {
         mAnimationRadiusMultiplier = 1;
         mTransitionMidRadiusMultiplier = 1f + (0.05f * (disappearsOut ? -1 : 1));
         mTransitionEndRadiusMultiplier = 1f + (0.3f * (disappearsOut ? 1 : -1));
-        mInvalidateUpdateListener = new InvalidateUpdateListener();
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.HONEYCOMB)
+            mInvalidateUpdateListener = new InvalidateUpdateListener();
 
         setSelection(selectionDegrees, isInnerCircle);
         mIsInitialized = true;
@@ -178,8 +181,7 @@ public class RadialSelectorView extends View {
             return -1;
         }
 
-        double hypotenuse = Math.sqrt(
-                (pointY - mYCenter) * (pointY - mYCenter) +
+        double hypotenuse = Math.sqrt((pointY - mYCenter) * (pointY - mYCenter) +
                         (pointX - mXCenter) * (pointX - mXCenter));
         // Check if we're outside the range
         if (mHasInnerCircle) {
@@ -294,6 +296,7 @@ public class RadialSelectorView extends View {
         }
     }
 
+    @RequiresApi(api = Build.VERSION_CODES.HONEYCOMB)
     public ObjectAnimator getDisappearAnimator() {
         if (!mIsInitialized || !mDrawValuesReady) {
             Log.e(TAG, "RadialSelectorView was not ready for animation.");
@@ -321,6 +324,7 @@ public class RadialSelectorView extends View {
         return disappearAnimator;
     }
 
+    @RequiresApi(api = Build.VERSION_CODES.HONEYCOMB)
     public ObjectAnimator getReappearAnimator() {
         if (!mIsInitialized || !mDrawValuesReady) {
             Log.e(TAG, "RadialSelectorView was not ready for animation.");
@@ -362,6 +366,7 @@ public class RadialSelectorView extends View {
     /**
      * We'll need to invalidate during the animation.
      */
+    @RequiresApi(api = Build.VERSION_CODES.HONEYCOMB)
     private class InvalidateUpdateListener implements ValueAnimator.AnimatorUpdateListener {
         @Override
         public void onAnimationUpdate(ValueAnimator animation) {
